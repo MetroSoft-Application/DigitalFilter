@@ -9,23 +9,28 @@ namespace DigitalFilter
         private double in2 = 0.0f;
         private double out1 = 0.0f;
         private double out2 = 0.0f;
-        private double omega;
-        private double alpha;
-        private double q;
-        private double bandWidth = 1.0f;
-        private double a0;
-        private double a1;
-        private double a2;
-        private double b0;
-        private double b1;
-        private double b2;
-        private int averageNum;
-        private Queue<double> buffer = new Queue<double>();
-
-        FilterType internalFilter;
-        public DigitalFilter(double secControl, double cutoff, FilterType filter)
+        private Queue<double> buffer;
+        public readonly double omega;
+        public readonly double alpha;
+        public readonly double q;
+        public readonly double bandWidth = 1.0f;
+        public readonly double a0;
+        public readonly double a1;
+        public readonly double a2;
+        public readonly double b0;
+        public readonly double b1;
+        public readonly double b2;
+        public readonly int averageNum;
+        public readonly FilterType internalFilter;
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="secControl">制御周期</param>
+        /// <param name="cutoff">カットオフ周波数</param>
+        /// <param name="filterType">フィルターの種類</param>
+        public DigitalFilter(double secControl, double cutoff, FilterType filterType)
         {
-            internalFilter = filter;
+            internalFilter = filterType;
             switch (internalFilter)
             {
                 case FilterType.LowPassFilter:
@@ -77,10 +82,16 @@ namespace DigitalFilter
                     break;
 
                 case FilterType.MovingAverageFilter:
+                    buffer = new Queue<double>();
                     averageNum = (int)cutoff;
                     break;
             }
         }
+        /// <summary>
+        /// 入力値に対するフィルタ適用値を返す
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns>フィルタ適用値</returns>
         public double FilterControl(double input)
         {
             switch (internalFilter)
@@ -104,17 +115,23 @@ namespace DigitalFilter
                                             b2 / a0 * in2 -
                                             a1 / a0 * out1 -
                                             a2 / a0 * out2;
-                    in2 = in1;   
-                    in1 = input; 
-                    out2 = out1;   
-                    out1 = output; 
+                    in2 = in1;
+                    in1 = input;
+                    out2 = out1;
+                    out1 = output;
 
                     return output;
             }
         }
-        public void bufferClear()
+        /// <summary>
+        /// キューバッファをクリアする
+        /// </summary>
+        public void BufferClear()
         {
-            buffer.Clear();
+            if (buffer != null)
+            {
+                buffer.Clear();
+            }
         }
     }
 }
