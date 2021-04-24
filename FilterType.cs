@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace DigitalFilter
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public enum FilterType
     {
         LowPassFilter,
