@@ -15,6 +15,7 @@ namespace DigitalFilter
         HighPassFilter,
         BandPassFilter,
         BandStopFilter,
+        AllPassFilter,
         MovingAverageFilter
     }
 }
