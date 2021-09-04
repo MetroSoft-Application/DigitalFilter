@@ -99,6 +99,7 @@ namespace DigitalFilter
                     break;
             }
         }
+
         /// <summary>
         /// 入力値に対するフィルタ適用値を返す
         /// </summary>
@@ -135,6 +136,7 @@ namespace DigitalFilter
                     return output;
             }
         }
+
         /// <summary>
         /// キューバッファをクリアする
         /// </summary>
