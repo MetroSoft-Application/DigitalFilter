@@ -1,5 +1,6 @@
 ﻿using static System.Math;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DigitalFilter
 {
@@ -29,8 +30,8 @@ namespace DigitalFilter
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="secControl">制御周期</param>
-        /// <param name="cutoff">カットオフ周波数</param>
+        /// <param name="secControl">制御周期(sec)</param>
+        /// <param name="cutoff">カットオフ周波数(Hz)</param>
         /// <param name="filterType">フィルターの種類</param>
         /// <param name="bandWidth">帯域幅(Default = 1octave)</param>
         public DigitalFilter(double secControl, double cutoff, FilterType filterType, double bandWidth = 1.0f)
@@ -99,6 +100,7 @@ namespace DigitalFilter
                     break;
             }
         }
+
         /// <summary>
         /// 入力値に対するフィルタ適用値を返す
         /// </summary>
@@ -110,16 +112,12 @@ namespace DigitalFilter
             {
                 case FilterType.MovingAverageFilter:
                     buffer.Enqueue(input);
-                    double sum = 0.0f;
                     if (buffer.Count > averageNum)
                     {
                         buffer.Dequeue();
                     }
-                    foreach (double data in buffer)
-                    {
-                        sum += data;
-                    }
-                    return (sum / averageNum);
+                    buffer.Sum();
+                    return (buffer.Sum() / averageNum);
 
                 default:
                     double output = b0 / a0 * input +
@@ -131,10 +129,10 @@ namespace DigitalFilter
                     in1 = input;
                     out2 = out1;
                     out1 = output;
-
                     return output;
             }
         }
+
         /// <summary>
         /// キューバッファをクリアする
         /// </summary>

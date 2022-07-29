@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace DigitalFilter
 {
     /// <summary>
-    /// 
+    /// フィルターの種類
     /// </summary>
     public enum FilterType
     {
