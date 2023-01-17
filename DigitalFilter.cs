@@ -9,11 +9,10 @@ namespace DigitalFilter
     /// </summary>
     public class DigitalFilter
     {
-        private double in1 = 0.0f;
-        private double in2 = 0.0f;
-        private double out1 = 0.0f;
-        private double out2 = 0.0f;
-        private Queue<double> buffer;
+        public readonly double in1 = 0.0f;
+        public readonly double in2 = 0.0f;
+        public readonly double out1 = 0.0f;
+        public readonly double out2 = 0.0f;
         public readonly double omega;
         public readonly double alpha;
         public readonly double internalBandWidth;
@@ -26,6 +25,7 @@ namespace DigitalFilter
         public readonly double b2;
         public readonly int averageNum;
         public readonly FilterType internalFilter;
+        private Queue<double> buffer;
 
         /// <summary>
         /// コンストラクタ
@@ -116,7 +116,6 @@ namespace DigitalFilter
                     {
                         buffer.Dequeue();
                     }
-                    buffer.Sum();
                     return (buffer.Sum() / averageNum);
 
                 default:

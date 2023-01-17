@@ -11,11 +11,11 @@ namespace DigitalFilter
     /// </summary>
     public enum FilterType
     {
-        LowPassFilter,
-        HighPassFilter,
-        BandPassFilter,
-        BandStopFilter,
-        AllPassFilter,
-        MovingAverageFilter
+        LowPassFilter
+        ,HighPassFilter
+        ,BandPassFilter
+        ,BandStopFilter
+        ,AllPassFilter
+        ,MovingAverageFilter
     }
 }
