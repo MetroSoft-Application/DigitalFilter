@@ -1,6 +1,7 @@
-﻿using static System.Math;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using static System.Math;
 
 namespace DigitalFilter
 {
@@ -9,13 +10,12 @@ namespace DigitalFilter
     /// </summary>
     public class DigitalFilter
     {
-        public readonly double in1 = 0.0f;
-        public readonly double in2 = 0.0f;
-        public readonly double out1 = 0.0f;
-        public readonly double out2 = 0.0f;
+        private double in1 = 0.0f;
+        private double in2 = 0.0f;
+        private double out1 = 0.0f;
+        private double out2 = 0.0f;
         public readonly double omega;
         public readonly double alpha;
-        public readonly double internalBandWidth;
         public readonly double q;
         public readonly double a0;
         public readonly double a1;
@@ -30,15 +30,17 @@ namespace DigitalFilter
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        /// <param name="secControl">制御周期(sec)</param>
-        /// <param name="cutoff">カットオフ周波数(Hz)</param>
+        /// <param name="controlHz">制御周波数(Hz)</param>
+        /// <param name="cutoffHz">カットオフ周波数(Hz)</param>
         /// <param name="filterType">フィルターの種類</param>
         /// <param name="bandWidth">帯域幅(Default = 1octave)</param>
-        public DigitalFilter(double secControl, double cutoff, FilterType filterType, double bandWidth = 1.0f)
+        public DigitalFilter(double controlHz,
+                             double cutoffHz,
+                             FilterType filterType,
+                             double bandWidth = 1.0f)
         {
-            internalBandWidth = bandWidth;
             internalFilter = filterType;
-            omega = 2.0f * PI * cutoff / secControl;
+            omega = 2.0f * PI * cutoffHz / controlHz;
             q = 1.0f / Sqrt(2);
             switch (internalFilter)
             {
@@ -64,7 +66,7 @@ namespace DigitalFilter
 
                 case FilterType.BandPassFilter:
                     alpha = Sin(omega) * Sinh(Log(2)) /
-                                2.0f * internalBandWidth * omega / Sin(omega);
+                                2.0f * bandWidth * omega / Sin(omega);
                     a0 = 1.0f + alpha;
                     a1 = -2.0f * Cos(omega);
                     a2 = 1.0f - alpha;
@@ -75,7 +77,7 @@ namespace DigitalFilter
 
                 case FilterType.BandStopFilter:
                     alpha = Sin(omega) * Sinh(Log(2)) /
-                                2.0f * internalBandWidth * omega / Sin(omega);
+                                2.0f * bandWidth * omega / Sin(omega);
                     a0 = 1.0f + alpha;
                     a1 = -2.0f * Cos(omega);
                     a2 = 1.0f - alpha;
@@ -96,7 +98,7 @@ namespace DigitalFilter
 
                 case FilterType.MovingAverageFilter:
                     buffer = new Queue<double>();
-                    averageNum = (int)cutoff;
+                    averageNum = (int)cutoffHz;
                     break;
             }
         }
@@ -116,7 +118,7 @@ namespace DigitalFilter
                     {
                         buffer.Dequeue();
                     }
-                    return (buffer.Sum() / averageNum);
+                    return buffer.Sum() / averageNum;
 
                 default:
                     double output = b0 / a0 * input +

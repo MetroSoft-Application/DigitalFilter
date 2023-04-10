@@ -1,9 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace DigitalFilter
 {
     /// <summary>
@@ -12,10 +6,10 @@ namespace DigitalFilter
     public enum FilterType
     {
         LowPassFilter
-        ,HighPassFilter
-        ,BandPassFilter
-        ,BandStopFilter
-        ,AllPassFilter
-        ,MovingAverageFilter
+        , HighPassFilter
+        , BandPassFilter
+        , BandStopFilter
+        , AllPassFilter
+        , MovingAverageFilter
     }
 }
