@@ -31,7 +31,7 @@ namespace DigitalFilter
         /// コンストラクタ
         /// </summary>
         /// <param name="controlHz">制御周波数(Hz)</param>
-        /// <param name="cutoffHz">カットオフ周波数(Hz)</param>
+        /// <param name="cutoffHz">カットオフ周波数(Hz) MovingAverageFilterの場合は移動平均数</param>
         /// <param name="filterType">フィルターの種類</param>
         /// <param name="bandWidth">帯域幅(Default = 1octave)</param>
         public DigitalFilter(double controlHz,
