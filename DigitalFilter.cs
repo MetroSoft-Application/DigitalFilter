@@ -44,7 +44,23 @@ namespace DigitalFilter
             q = 1.0f / Sqrt(2);
             switch (internalFilter)
             {
-                case FilterType.LowPassFilter:
+                case FilterType.LowPassFilter_1st:
+                    alpha = Sin(omega) / (1.0 + Sin(omega));
+                    b0 = alpha;
+                    b1 = alpha;
+                    a0 = 1.0 + alpha;
+                    a1 = -Cos(omega) / (1.0 + alpha);
+                    break;
+
+                case FilterType.HighPassFilter_1st:
+                    alpha = Sin(omega) / (1.0 + Sin(omega));
+                    b0 = 1.0 / (1.0 + alpha);
+                    b1 = -1.0 / (1.0 + alpha);
+                    a0 = 1.0;
+                    a1 = -Cos(omega) / (1.0 + alpha);
+                    break;
+
+                case FilterType.LowPassFilter_2nd:
                     alpha = Sin(omega) / (2.0f * q);
                     a0 = 1.0f + alpha;
                     a1 = -2.0f * Cos(omega);
@@ -54,7 +70,7 @@ namespace DigitalFilter
                     b2 = (1.0f - Cos(omega)) / 2.0f;
                     break;
 
-                case FilterType.HighPassFilter:
+                case FilterType.HighPassFilter_2nd:
                     alpha = Sin(omega) / (2.0f * q);
                     a0 = 1.0f + alpha;
                     a1 = -2.0f * Cos(omega);
@@ -100,6 +116,9 @@ namespace DigitalFilter
                     buffer = new Queue<double>();
                     averageNum = (int)cutoffHz;
                     break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(filterType), filterType, null);
             }
         }
 
@@ -110,8 +129,18 @@ namespace DigitalFilter
         /// <returns>フィルタ適用値</returns>
         public double FilterControl(double input)
         {
+            double output;
             switch (internalFilter)
             {
+                case FilterType.LowPassFilter_1st:
+                case FilterType.HighPassFilter_1st:
+                    output = (b0 / a0 * input) +
+                             (b1 / a0 * in1) -
+                             (a1 / a0 * out1);
+                    in1 = input;
+                    out1 = output;
+                    return output;
+
                 case FilterType.MovingAverageFilter:
                     buffer.Enqueue(input);
                     if (buffer.Count > averageNum)
@@ -121,11 +150,11 @@ namespace DigitalFilter
                     return buffer.Sum() / averageNum;
 
                 default:
-                    double output = b0 / a0 * input +
-                                            b1 / a0 * in1 +
-                                            b2 / a0 * in2 -
-                                            a1 / a0 * out1 -
-                                            a2 / a0 * out2;
+                    output = (b0 / a0 * input) +
+                             (b1 / a0 * in1) +
+                             (b2 / a0 * in2) -
+                             (a1 / a0 * out1) -
+                             (a2 / a0 * out2);
                     in2 = in1;
                     in1 = input;
                     out2 = out1;
