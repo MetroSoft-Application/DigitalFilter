@@ -10,10 +10,11 @@ namespace DigitalFilter
     /// </summary>
     public class DigitalFilter
     {
-        private double in1 = 0.0f;
-        private double in2 = 0.0f;
-        private double out1 = 0.0f;
-        private double out2 = 0.0f;
+        private double in1 = 0.0;
+        private double in2 = 0.0;
+        private double out1 = 0.0;
+        private double out2 = 0.0;
+        private double movingSum = 0.0;
         public readonly double omega;
         public readonly double alpha;
         public readonly double q;
@@ -37,11 +38,12 @@ namespace DigitalFilter
         public DigitalFilter(double controlHz,
                              double cutoffHz,
                              FilterType filterType,
-                             double bandWidth = 1.0f)
+                             double bandWidth = 1.0)
         {
             internalFilter = filterType;
-            omega = 2.0f * PI * cutoffHz / controlHz;
-            q = 1.0f / Sqrt(2);
+            omega = 2.0 * PI * cutoffHz / controlHz;
+            q = 1.0 / Sqrt(2);
+
             switch (internalFilter)
             {
                 case FilterType.LowPassFilter_1st:
@@ -61,55 +63,53 @@ namespace DigitalFilter
                     break;
 
                 case FilterType.LowPassFilter_2nd:
-                    alpha = Sin(omega) / (2.0f * q);
-                    a0 = 1.0f + alpha;
-                    a1 = -2.0f * Cos(omega);
-                    a2 = 1.0f - alpha;
-                    b0 = (1.0f - Cos(omega)) / 2.0f;
-                    b1 = 1.0f - Cos(omega);
-                    b2 = (1.0f - Cos(omega)) / 2.0f;
+                    alpha = Sin(omega) / (2.0 * q);
+                    a0 = 1.0 + alpha;
+                    a1 = -2.0 * Cos(omega);
+                    a2 = 1.0 - alpha;
+                    b0 = (1.0 - Cos(omega)) / 2.0;
+                    b1 = 1.0 - Cos(omega);
+                    b2 = (1.0 - Cos(omega)) / 2.0;
                     break;
 
                 case FilterType.HighPassFilter_2nd:
-                    alpha = Sin(omega) / (2.0f * q);
-                    a0 = 1.0f + alpha;
-                    a1 = -2.0f * Cos(omega);
-                    a2 = 1.0f - alpha;
-                    b0 = (1.0 + Cos(omega)) / 2.0f;
-                    b1 = -(1.0f + Cos(omega));
-                    b2 = (1.0f + Cos(omega)) / 2.0f;
+                    alpha = Sin(omega) / (2.0 * q);
+                    a0 = 1.0 + alpha;
+                    a1 = -2.0 * Cos(omega);
+                    a2 = 1.0 - alpha;
+                    b0 = (1.0 + Cos(omega)) / 2.0;
+                    b1 = -(1.0 + Cos(omega));
+                    b2 = (1.0 + Cos(omega)) / 2.0;
                     break;
 
                 case FilterType.BandPassFilter:
-                    alpha = Sin(omega) * Sinh(Log(2)) /
-                                2.0f * bandWidth * omega / Sin(omega);
-                    a0 = 1.0f + alpha;
-                    a1 = -2.0f * Cos(omega);
-                    a2 = 1.0f - alpha;
+                    alpha = Sin(omega) * Sinh(Log(2)) / 2.0 * bandWidth * omega / Sin(omega);
+                    a0 = 1.0 + alpha;
+                    a1 = -2.0 * Cos(omega);
+                    a2 = 1.0 - alpha;
                     b0 = alpha;
-                    b1 = 0.0f;
+                    b1 = 0.0;
                     b2 = -alpha;
                     break;
 
                 case FilterType.BandStopFilter:
-                    alpha = Sin(omega) * Sinh(Log(2)) /
-                                2.0f * bandWidth * omega / Sin(omega);
-                    a0 = 1.0f + alpha;
-                    a1 = -2.0f * Cos(omega);
-                    a2 = 1.0f - alpha;
-                    b0 = 1.0f;
-                    b1 = -2.0f * Cos(omega);
-                    b2 = 1.0f;
+                    alpha = Sin(omega) * Sinh(Log(2)) / 2.0 * bandWidth * omega / Sin(omega);
+                    a0 = 1.0 + alpha;
+                    a1 = -2.0 * Cos(omega);
+                    a2 = 1.0 - alpha;
+                    b0 = 1.0;
+                    b1 = -2.0 * Cos(omega);
+                    b2 = 1.0;
                     break;
 
                 case FilterType.AllPassFilter:
-                    alpha = Sin(omega) / (2.0f * q);
-                    a0 = 1.0f + alpha;
-                    a1 = -2.0f * Cos(omega);
-                    a2 = 1.0f - alpha;
-                    b0 = 1.0f - alpha;
-                    b1 = -2.0f * Cos(omega);
-                    b2 = 1.0f + alpha;
+                    alpha = Sin(omega) / (2.0 * q);
+                    a0 = 1.0 + alpha;
+                    a1 = -2.0 * Cos(omega);
+                    a2 = 1.0 - alpha;
+                    b0 = 1.0 - alpha;
+                    b1 = -2.0 * Cos(omega);
+                    b2 = 1.0 + alpha;
                     break;
 
                 case FilterType.MovingAverageFilter:
@@ -142,12 +142,23 @@ namespace DigitalFilter
                     return output;
 
                 case FilterType.MovingAverageFilter:
+                    if (buffer == null)
+                    {
+                        buffer = new Queue<double>();
+                    }
+
+                    // 新しい値追加
+                    movingSum += input;
                     buffer.Enqueue(input);
+
+                    // 古い値削除
                     if (buffer.Count > averageNum)
                     {
-                        buffer.Dequeue();
+                        movingSum -= buffer.Dequeue();
                     }
-                    return buffer.Sum() / averageNum;
+
+                    // 平均計算
+                    return movingSum / buffer.Count;
 
                 default:
                     output = (b0 / a0 * input) +
@@ -164,13 +175,20 @@ namespace DigitalFilter
         }
 
         /// <summary>
-        /// キューバッファをクリアする
+        /// フィルタの状態をリセットする
         /// </summary>
-        public void BufferClear()
+        public void Reset()
         {
+            in1 = 0.0;
+            in2 = 0.0;
+            out1 = 0.0;
+            out2 = 0.0;
+
+            // MovingAverageFilterの場合はバッファも初期化
             if (buffer != null)
             {
                 buffer.Clear();
+                movingSum = 0.0;
             }
         }
     }
